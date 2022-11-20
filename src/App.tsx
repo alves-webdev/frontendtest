@@ -1,26 +1,137 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import {
+  Box, Drawer, Typography, Accordion, AccordionSummary, AccordionDetails
+} from "@material-ui/core";
+import myoctokit from "./UseApi/useApi";
+import { useEffect, useState } from "react";
+import { User, Repository } from "./_types";
+import { motion } from "framer-motion";
+import Pagination from "./components/pagination/pagination";
+import CloseIcon from '@mui/icons-material/Close';
+
+
 
 function App() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [Repositories, setRepositories] = useState<Repository[]>([]);
+  const [page, setPage] = useState(1);
+  const [postPerPage, setPostPerPage] = useState(12);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const lasPostIntex = page * postPerPage;
+  const firstPostIntex = lasPostIntex - postPerPage;
+  const currentPost = users.slice(firstPostIntex, lasPostIntex);
+
+  const selectuser = (user: User) => {
+    setSelectedUser(user);
+    setIsOpen(true);
+  };
+
+  const getUsers = async () => {
+      const response = await myoctokit.request("GET /users{?since,per_page}", {
+        since: 0,
+        per_page: 100,
+      });
+      setUsers(response.data);
+    }
+
+  const  hadleCardClick = async (login: string) => {
+    const userresponse:any = await myoctokit.request("GET /users/{username}", {
+      username: login,
+    });
+    setSelectedUser(userresponse.data);
+    const response:any = await myoctokit.request("GET /users/{username}/repos", {
+      username: login,
+    });
+    setRepositories(response.data);
+    console.log(response.data);
+  }
+
+
+  useEffect(() => {
+    getUsers();
+  }, [page]);
+
+  console.log(users[users.length - 1]?.id,)
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {isOpen && (
+        <div
+        className="profile"
         >
-          Learn React
-        </a>
-      </header>
+        <CloseIcon className="closeicon" onClick={() => setIsOpen(false)} />
+        <div className="info">
+        <img src={selectedUser?.avatar_url} alt="avatar" />
+        <h2>User: {selectedUser?.login}</h2>
+        <h2>Name: {selectedUser?.name}</h2>
+        <h3>Created at: {selectedUser?.created_at}</h3>
+        <h4>From: {selectedUser?.location}</h4>
+        <h4><a href={selectedUser?.html_url}>{selectedUser?.html_url}</a></h4>
+        </div>
+        <div className="repo">
+        <h1>{selectedUser?.login}'s Repositories</h1>
+        {Repositories.map((repo) => (
+          
+          <Accordion
+          key={repo.id}
+          className="accordion"
+          >
+            <AccordionSummary>
+            <h1>{repo.name}</h1>
+            </AccordionSummary>
+            <AccordionDetails
+            className="repo-details">
+            <h3>Repository id: {repo.id}</h3>
+            <h3><a href={repo.html_url}>{repo.html_url}</a></h3>
+            <h4>{repo.description}</h4>
+            </AccordionDetails>
+          </Accordion>
+            ))}
+           </div>
+        </div>
+      )}
+      <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Pagination postsPerPage={postPerPage} totalPosts={users.length} paginate={setPage} />
+      </div>
+    <div
+    className="App"
+    >
+
+        {currentPost.map((user) => (
+          <div className="card"
+          key={user.id}>
+            <Box  className="Box"
+            onClick={() => 
+              {hadleCardClick(user.login); setIsOpen(true); console.log(selectedUser);}}
+            >
+              <img src={user.avatar_url} alt={user.login} width="100" />
+              <span>{user.login}</span>
+              <span>{user.id}</span>
+            
+              </Box>
+              
+          </div>
+        ))}
+    </div>
     </div>
   );
 }
+
 
 export default App;
