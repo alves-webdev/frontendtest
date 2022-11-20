@@ -1,9 +1,16 @@
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Before running the app
+
+install node modules by running:
+### `npm install`
+in the project's directory
+
+and remember to paste your own [github token](https://github.com/settings/tokens) to the [UseApi](https://github.com/http-gabrielalves/frontendtest/blob/main/src/UseApi/useApi.tsx) file
 
 ## Available Scripts
-
+ 
 In the project directory, you can run:
 
 ### `npm start`
