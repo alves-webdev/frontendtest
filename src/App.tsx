@@ -1,15 +1,15 @@
 import "./App.css";
 import {
-  Box, Drawer, Typography, Accordion, AccordionSummary, AccordionDetails
+  Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import myoctokit from "./UseApi/useApi";
 import { useEffect, useState } from "react";
 import { User, Repository } from "./_types";
-import { motion } from "framer-motion";
 import Pagination from "./components/pagination/pagination";
-import CloseIcon from '@mui/icons-material/Close';
-
-
+import CloseIcon from "@mui/icons-material/Close";
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
@@ -23,37 +23,35 @@ function App() {
   const firstPostIntex = lasPostIntex - postPerPage;
   const currentPost = users.slice(firstPostIntex, lasPostIntex);
 
-  const selectuser = (user: User) => {
-    setSelectedUser(user);
-    setIsOpen(true);
-  };
 
   const getUsers = async () => {
-      const response = await myoctokit.request("GET /users{?since,per_page}", {
-        since: 0,
-        per_page: 100,
-      });
-      setUsers(response.data);
-    }
+    const response = await myoctokit.request("GET /users{?since,per_page}", {
+      since: 0,
+      per_page: 100,
+    });
+    setUsers(response.data);
+  };
 
-  const  hadleCardClick = async (login: string) => {
-    const userresponse:any = await myoctokit.request("GET /users/{username}", {
+  const hadleCardClick = async (login: string) => {
+    const userresponse: any = await myoctokit.request("GET /users/{username}", {
       username: login,
     });
     setSelectedUser(userresponse.data);
-    const response:any = await myoctokit.request("GET /users/{username}/repos", {
-      username: login,
-    });
+    const response: any = await myoctokit.request(
+      "GET /users/{username}/repos",
+      {
+        username: login,
+      }
+    );
     setRepositories(response.data);
     console.log(response.data);
-  }
-
+  };
 
   useEffect(() => {
     getUsers();
   }, [page]);
 
-  console.log(users[users.length - 1]?.id,)
+  console.log(users[users.length - 1]?.id);
 
   return (
     <div
@@ -65,74 +63,72 @@ function App() {
       }}
     >
       {isOpen && (
-        <div
-        className="profile"
-        >
-        <CloseIcon className="closeicon" onClick={() => setIsOpen(false)} />
-        <div className="info">
-        <img src={selectedUser?.avatar_url} alt="avatar" />
-        <h3>User: {selectedUser?.login}</h3>
-        <h3>user id: {selectedUser?.id}</h3> 
-        <h3>Name: {selectedUser?.name}</h3>
-        <h4>Created at: {selectedUser?.created_at}</h4>
-        <h4>{selectedUser?.location}</h4>
-        <h4><a href={selectedUser?.html_url}>{selectedUser?.html_url}</a></h4>
-        </div>
-        <div className="repo">
-        <h1>{selectedUser?.login}'s Repositories</h1>
-        {Repositories.map((repo) => (
-          
-          <Accordion
-          key={repo.id}
-          className="accordion"
-          >
-            <AccordionSummary>
-            <h1>{repo.name}</h1>
-            </AccordionSummary>
-            <AccordionDetails
-            className="repo-details">
-            <h3>Repository id: {repo.id}</h3>
-            <h3><a href={repo.html_url}>{repo.html_url}</a></h3>
-            <h4>{repo.description}</h4>
-            </AccordionDetails>
-          </Accordion>
+        <div className="profile">
+          <CloseIcon className="closeicon" onClick={() => setIsOpen(false)} />
+          <div className="info">
+            <img src={selectedUser?.avatar_url} alt="avatar" />
+            <h3>User: {selectedUser?.login}</h3>
+            <h3>user id: {selectedUser?.id}</h3>
+            <h3>Name: {selectedUser?.name}</h3>
+            <h4>Created at: {selectedUser?.created_at}</h4>
+            <h4>{selectedUser?.location}</h4>
+            <h4>
+              <a href={selectedUser?.html_url}>{selectedUser?.html_url}</a>
+            </h4>
+          </div>
+          <div className="repo">
+            <h1>{selectedUser?.login}'s Repositories</h1>
+            {Repositories.map((repo) => (
+              <Accordion key={repo.id} className="accordion">
+                <AccordionSummary>
+                  <h1>{repo.name}</h1>
+                </AccordionSummary>
+                <AccordionDetails className="repo-details">
+                  <h3>Repository id: {repo.id}</h3>
+                  <h3>
+                    <a href={repo.html_url}>{repo.html_url}</a>
+                  </h3>
+                  <h4>{repo.description}</h4>
+                </AccordionDetails>
+              </Accordion>
             ))}
-           </div>
+          </div>
         </div>
       )}
       <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Pagination postsPerPage={postPerPage} totalPosts={users.length} paginate={setPage} />
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Pagination
+          postsPerPage={postPerPage}
+          totalPosts={users.length}
+          paginate={setPage}
+        />
       </div>
-    <div
-    className="App"
-    >
-
+      <div className="App">
         {currentPost.map((user) => (
-          <div className="card"
-          key={user.id}>
-            <Box  className="Box"
-            onClick={() => 
-              {hadleCardClick(user.login); setIsOpen(true); console.log(selectedUser);}}
+          <div className="card" key={user.id}>
+            <Box
+              className="Box"
+              onClick={() => {
+                hadleCardClick(user.login);
+                setIsOpen(true);
+                console.log(selectedUser);
+              }}
             >
               <img src={user.avatar_url} alt={user.login} width="100" />
               <span>{user.login}</span>
               <span>{user.id}</span>
-            
-              </Box>
-              
+            </Box>
           </div>
         ))}
-    </div>
+      </div>
     </div>
   );
 }
-
 
 export default App;
