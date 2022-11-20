@@ -1,7 +1,7 @@
 import "./App.css";
 import {
   Box, Drawer, Typography, Accordion, AccordionSummary, AccordionDetails
-} from "@material-ui/core";
+} from "@mui/material";
 import myoctokit from "./UseApi/useApi";
 import { useEffect, useState } from "react";
 import { User, Repository } from "./_types";
@@ -71,10 +71,11 @@ function App() {
         <CloseIcon className="closeicon" onClick={() => setIsOpen(false)} />
         <div className="info">
         <img src={selectedUser?.avatar_url} alt="avatar" />
-        <h2>User: {selectedUser?.login}</h2>
-        <h2>Name: {selectedUser?.name}</h2>
-        <h3>Created at: {selectedUser?.created_at}</h3>
-        <h4>From: {selectedUser?.location}</h4>
+        <h3>User: {selectedUser?.login}</h3>
+        <h3>user id: {selectedUser?.id}</h3> 
+        <h3>Name: {selectedUser?.name}</h3>
+        <h4>Created at: {selectedUser?.created_at}</h4>
+        <h4>{selectedUser?.location}</h4>
         <h4><a href={selectedUser?.html_url}>{selectedUser?.html_url}</a></h4>
         </div>
         <div className="repo">
